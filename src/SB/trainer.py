@@ -26,10 +26,12 @@ def train_FasterRCNN(hyperparameters):
 
     # Initializing dataset
     dataset = SB_Detection(dataset_type=SB_Detection.TRAIN, tensor_library=SB_Detection.TENSOR_LIB_TORCH)
+    dataset.shuffle()
     dataloader = DataLoader(dataset,
                             batch_size=hyperparameters['batch_size'],
                             num_workers=hyperparameters['num_workers'],
-                            collate_fn=SB_Detection.collate_dataloader_batch)
+                            collate_fn=SB_Detection.collate_dataloader_batch,
+                            shuffle=True)
 
     # Defining optimizer
     optimizer = hyperparameters['optimizer']['type'](network.parameters(),
@@ -52,7 +54,6 @@ def train_FasterRCNN(hyperparameters):
         loss_threshold = float(re.findall('[0-9].[0-9]+', file_name)[0])
     else:
         loss_threshold = float('inf')
-    print('Loss Threshold:', loss_threshold)
 
     for epoch_idx in range(hyperparameters['num_epochs']):
         epoch_start_time = time.time()
@@ -62,9 +63,10 @@ def train_FasterRCNN(hyperparameters):
         print('-' * 80)
 
         batch_idx = 0
-        dataset.shuffle()
         total_batches = math.ceil(len(dataset) / hyperparameters['batch_size'])
         progress_bar = tqdm(desc='Batches Completed', total=total_batches)
+        batch_loss = float('inf')
+        epoch_loss_dict = {}
         for batch in dataloader:
 
             inputs, outputs = batch
@@ -73,6 +75,11 @@ def train_FasterRCNN(hyperparameters):
 
             loss_dict = network.fit_batch(inputs, outputs)
             batch_loss = sum(loss for loss in loss_dict.values())
+            for loss_type in loss_dict.keys():
+                if loss_type in epoch_loss_dict.keys():
+                    epoch_loss_dict[loss_type] += loss_dict[loss_type].item()
+                else:
+                    epoch_loss_dict[loss_type] = loss_dict[loss_type].item()
 
             optimizer.zero_grad()
             batch_loss.backward()
@@ -85,18 +92,29 @@ def train_FasterRCNN(hyperparameters):
 
             batch_idx += 1
             progress_bar.set_description(
-                'Losses: RPN_Regression: {} | RPN_Objecteness: {} | Classification: {} | Regression: {}'.format(
-                    round(loss_dict['loss_rpn_box_reg'].item(), 3),
-                    round(loss_dict['loss_objectness'].item(), 3),
-                    round(loss_dict['loss_classifier'].item(), 3),
-                    round(loss_dict['loss_box_reg'].item(), 3)
+                'Losses: RPN Regression: {} | RPN Objecteness: {} | Classification: {} | Regression: {}'.format(
+                    round(loss_dict['loss_rpn_box_reg'].item(), 5),
+                    round(loss_dict['loss_objectness'].item(), 5),
+                    round(loss_dict['loss_classifier'].item(), 5),
+                    round(loss_dict['loss_box_reg'].item(), 5)
                 ))
             progress_bar.update(1)
+
         epoch_end_time = time.time()
         progress_bar.close()
 
+        torch.save(network.get_state_dict(),
+                   os.path.join(training_instance_folder_path, 'Epoch-{} Loss-{}.pt'.format(epoch_idx + 1, batch_loss)))
+
         print('-' * 80)
-        print('Epoch (Train) Time:', epoch_end_time - epoch_start_time)
+
+        print('Epoch Losses: ')
+        print('•RPN Regression:\n\t•Cumulative: {}\n\t•Mean:{}'.format(round(epoch_loss_dict['loss_rpn_box_reg'], 10), round(epoch_loss_dict['loss_rpn_box_reg'], 10) / len(dataset)))
+        print('•RPN Objectness:\n\t•Cumulative: {}\n\t•Mean:{}'.format(round(epoch_loss_dict['loss_objectness'], 10), round(epoch_loss_dict['loss_rpn_box_reg'], 10) / len(dataset)))
+        print('•Classification:\n\t•Cumulative: {}\n\t•Mean:{}'.format(round(epoch_loss_dict['loss_classifier'], 10), round(epoch_loss_dict['loss_rpn_box_reg'], 10) / len(dataset)))
+        print('•Regression:\n\t•Cumulative: {}\n\t•Mean:{}'.format(round(epoch_loss_dict['loss_box_reg'], 10), round(epoch_loss_dict['loss_rpn_box_reg'], 10) / len(dataset)))
+
+        print('Epoch Time:', epoch_end_time - epoch_start_time)
         print('-' * 80)
         print()
 
@@ -104,8 +122,8 @@ def train_FasterRCNN(hyperparameters):
 if __name__ == '__main__':
     # Defining hyperparameters for FasterRCNN
     hyperparameters = {
-        'batch_size': 5,
-        'num_workers': 4,
+        'batch_size': 2,
+        'num_workers': 5,
         'num_epochs': 30,
         'device': 'cpu',
         'optimizer': {

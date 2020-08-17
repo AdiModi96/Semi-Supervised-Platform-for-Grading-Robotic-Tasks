@@ -107,7 +107,7 @@ class SB_Detection(Dataset):
         return np.transpose(image, axes=(2, 0, 1))
 
     @staticmethod
-    def send_image_channels_last(image):
+    def send_image_channels_back(image):
         assert type(image) == np.ndarray
         return np.transpose(image, axes=(1, 2, 0))
 

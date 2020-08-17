@@ -72,7 +72,8 @@ def extract_frames_and_get_annotations(video_file_path, video_annotations_file_p
         return frames_annotations
 
 
-TYPE = 'train'
+# TYPE = 'train'
+TYPE = 'test'
 
 # Checking if videos folder exists
 videos_folder_path = os.path.join(paths.sb_data_folder_path, TYPE, 'videos')
