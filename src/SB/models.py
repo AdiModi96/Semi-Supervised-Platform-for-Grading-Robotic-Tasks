@@ -5,7 +5,7 @@ from torchvision.models.detection.rpn import AnchorGenerator
 
 class FasterRCNN:
 
-    def __init__(self, pretrained=True):
+    def __init__(self, pretrained=False):
         backbone = resnet_fpn_backbone('resnet50', pretrained=pretrained)
         num_classes = 4 + 1
 

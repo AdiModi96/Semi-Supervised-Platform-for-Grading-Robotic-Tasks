@@ -43,17 +43,21 @@ class ImageUtils:
             point_tl = (int(boxes[i][0]), int(boxes[i][1]))
             point_br = (int(boxes[i][2]), int(boxes[i][3]))
 
-            cv2.rectangle(image,
-                          pt1=point_tl,
-                          pt2=point_br,
-                          color=SB_Detection.OBJECT_COLORS[SB_Detection.OBJECT_ID_TO_NAME[labels[i]]],
-                          thickness=2)
-            cv2.putText(image,
-                        text=SB_Detection.OBJECT_ID_TO_NAME[labels[i]],
-                        org=(point_tl[0], point_tl[1] - 2),
-                        fontFace=cv2.FONT_ITALIC,
-                        fontScale=0.75,
-                        color=SB_Detection.OBJECT_COLORS[SB_Detection.OBJECT_ID_TO_NAME[labels[i]]],
-                        thickness=1)
+            cv2.rectangle(
+                image,
+                pt1=point_tl,
+                pt2=point_br,
+                color=SB_Detection.OBJECT_COLORS[SB_Detection.OBJECT_ID_TO_NAME[labels[i]]],
+                thickness=2
+            )
+            cv2.putText(
+                image,
+                text=SB_Detection.OBJECT_ID_TO_NAME[labels[i]],
+                org=(point_tl[0], point_tl[1] - 2),
+                fontFace=cv2.FONT_ITALIC,
+                fontScale=0.75,
+                color=SB_Detection.OBJECT_COLORS[SB_Detection.OBJECT_ID_TO_NAME[labels[i]]],
+                thickness=1
+            )
 
         return image

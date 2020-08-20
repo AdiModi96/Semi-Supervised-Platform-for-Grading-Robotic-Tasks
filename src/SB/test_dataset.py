@@ -10,7 +10,7 @@ def test_SB_Detection_dataset(dataset_type=SB_Detection.TRAIN):
 
     dataset.shuffle()
 
-    num_subplots = (2, 2)
+    num_subplots = (1, 1)
     subplot_idx = 1
 
     plt.figure(num='Images')

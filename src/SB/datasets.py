@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-import paths
+from src import paths
 
 
 class SB_Detection(Dataset):
@@ -76,7 +76,8 @@ class SB_Detection(Dataset):
 
         # Reading image, swapping channels from BGR to RGB and normalizing it tp [0, 1]
         image = cv2.cvtColor(
-            cv2.imread(os.path.join(self.frames_folder_path, instance['frame_file_name']), cv2.IMREAD_COLOR),
+            cv2.imread(
+                os.path.join(self.frames_folder_path, instance['frame_file_name']), cv2.IMREAD_COLOR),
             cv2.COLOR_BGR2RGB
         ) / 255
         labels = []

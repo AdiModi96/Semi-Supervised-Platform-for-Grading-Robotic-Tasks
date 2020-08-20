@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from matplotlib import pyplot as plt
 
-import paths
+from src import paths
 from src.SB.datasets import SB_Detection
 from src.SB.models import FasterRCNN
 from src.SB.utils import ImageUtils as IU
@@ -31,10 +31,10 @@ def test_FasterRCNN():
     predicted_annotations['scores'] = predicted_annotations['scores'].to('cpu').detach().numpy()
 
     # Filtering
-    condition = predicted_annotations['scores'] > 0.8
-    predicted_annotations['boxes'] = predicted_annotations['boxes'][condition]
-    predicted_annotations['labels'] = predicted_annotations['labels'][condition]
-    predicted_annotations['scores'] = predicted_annotations['scores'][condition]
+    # condition = predicted_annotations['scores'] > 0.8
+    # predicted_annotations['boxes'] = predicted_annotations['boxes'][condition]
+    # predicted_annotations['labels'] = predicted_annotations['labels'][condition]
+    # predicted_annotations['scores'] = predicted_annotations['scores'][condition]
 
     annotated_image = SB_Detection.send_image_channels_back(annotated_image.to('cpu').detach().numpy())
 
@@ -48,5 +48,6 @@ def test_FasterRCNN():
 
 if __name__ == '__main__':
     print('Commencing Testing')
-    test_FasterRCNN()
+    for i in range(10):
+        test_FasterRCNN()
     print('Testing Completed')

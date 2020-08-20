@@ -5,7 +5,7 @@ import cv2
 from bs4 import BeautifulSoup as BS4
 from tqdm import tqdm
 
-import paths
+from src import paths
 from src.SB.utils import VideoSurfer as VS
 
 OBJECT_ID_TO_NAME = {
