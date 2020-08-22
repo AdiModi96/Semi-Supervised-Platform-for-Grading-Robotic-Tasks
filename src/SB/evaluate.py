@@ -1,5 +1,6 @@
 import math
 import os
+import time
 
 import torch
 from torch.utils.data import DataLoader
@@ -10,28 +11,28 @@ from src.SB.datasets import SB_Detection
 from src.SB.models import FasterRCNN
 
 
-def get_losses(hyperparameters):
-    if hyperparameters['device'] == 'cuda':
+def get_losses(parameters):
+    if parameters['device'] == 'cuda':
         torch.cuda.init()
 
     # Initializing network
-    network = FasterRCNN()
-    if hyperparameters['network']['weights_file_path']:
-        network.set_state_dict(torch.load(hyperparameters['network']['weights_file_path']))
+    network = parameters['network']['model']()
+    if parameters['network']['weights_file_path']:
+        network.set_state_dict(torch.load(parameters['network']['weights_file_path']))
     network.train()
-    network.to(hyperparameters['device'])
+    network.to(parameters['device'])
 
     # Initializing dataset
     dataset = SB_Detection(
-        dataset_type=hyperparameters['dataset_type'],
+        dataset_type=parameters['dataset_type'],
         tensor_library=SB_Detection.TENSOR_LIB_TORCH
     )
 
     dataset.shuffle()
     dataloader = DataLoader(
         dataset,
-        batch_size=hyperparameters['batch_size'],
-        num_workers=hyperparameters['num_workers'],
+        batch_size=parameters['batch_size'],
+        num_workers=parameters['num_workers'],
         collate_fn=SB_Detection.collate_dataloader_batch,
         shuffle=True
     )
@@ -40,7 +41,7 @@ def get_losses(hyperparameters):
 
     batch_idx = 0
 
-    total_batches = math.ceil(len(dataset) / hyperparameters['batch_size'])
+    total_batches = math.ceil(len(dataset) / parameters['batch_size'])
     progress_bar = tqdm(desc='Batches Completed', total=total_batches)
     epoch_loss_dictionary = {
         'loss_rpn_box_reg': 0,
@@ -48,12 +49,13 @@ def get_losses(hyperparameters):
         'loss_classifier': 0,
         'loss_box_reg': 0,
     }
+    epoch_start_time = time.time()
     for batch in dataloader:
 
         # Getting network inputs and outputs for the batch
         inputs, outputs = batch
-        inputs = [image.to(hyperparameters['device']) for image in inputs]
-        outputs = [{key: output[key].to(hyperparameters['device']) for key in output.keys()} for output in outputs]
+        inputs = [image.to(parameters['device']) for image in inputs]
+        outputs = [{key: output[key].to(parameters['device']) for key in output.keys()} for output in outputs]
 
         # Getting batch loss
         batch_loss_dictionary = network.fit_batch(inputs, outputs)
@@ -73,32 +75,57 @@ def get_losses(hyperparameters):
         batch_idx += 1
         progress_bar.update(1)
 
-    print('-' * 80)
+    epoch_end_time = time.time()
+    progress_bar.close()
 
-    print('Epoch Losses: ')
-    print('•RPN Regression:\n\t•Cumulative: {}\n\t•Mean: {}'.format(round(epoch_loss_dictionary['loss_rpn_box_reg'], 7), round(epoch_loss_dictionary['loss_rpn_box_reg'], 7) / len(dataset)))
-    print('•RPN Objectness:\n\t•Cumulative: {}\n\t•Mean: {}'.format(round(epoch_loss_dictionary['loss_objectness'], 7), round(epoch_loss_dictionary['loss_objectness'], 7) / len(dataset)))
-    print('•Classification:\n\t•Cumulative: {}\n\t•Mean: {}'.format(round(epoch_loss_dictionary['loss_classifier'], 7), round(epoch_loss_dictionary['loss_classifier'], 7) / len(dataset)))
-    print('•Regression:\n\t•Cumulative: {}\n\t•Mean: {}'.format(round(epoch_loss_dictionary['loss_box_reg'], 7), round(epoch_loss_dictionary['loss_box_reg'], 7) / len(dataset)))
+    sum_epoch_losses = sum([(epoch_loss_dictionary[key] / len(dataset)) for key in epoch_loss_dictionary.keys()])
 
     print('-' * 80)
-    print()
+
+    epoch_summary = '''
+            Epoch Losses: 
+            •RPN Regression:
+                •Cumulative: {}
+                •Mean: {}
+            •RPN Objectness:
+                •Cumulative: {}
+                •Mean: {}
+            •Classification:
+                •Cumulative: {}
+                •Mean: {}
+            •Regression:
+                •Cumulative: {}
+                •Mean: {}
+            •Sum Epoch Losses:
+                •Mean: {}
+            Epoch Time: {}
+            '''.format(
+        round(epoch_loss_dictionary['loss_rpn_box_reg'], 7), round(epoch_loss_dictionary['loss_rpn_box_reg'] / len(dataset), 7),
+        round(epoch_loss_dictionary['loss_objectness'], 7), round(epoch_loss_dictionary['loss_objectness'] / len(dataset), 7),
+        round(epoch_loss_dictionary['loss_classifier'], 7), round(epoch_loss_dictionary['loss_classifier'] / len(dataset), 7),
+        round(epoch_loss_dictionary['loss_box_reg'], 7), round(epoch_loss_dictionary['loss_box_reg'] / len(dataset), 7),
+        sum_epoch_losses,
+        round(epoch_end_time - epoch_start_time, 3)
+    )
+
+    print(epoch_summary)
 
 
 if __name__ == '__main__':
-    # Defining hyperparameters for FasterRCNN
-    hyperparameters = {
-        'batch_size': 5,
-        'num_workers': 5,
+    # Building parameters for evaluation
+    parameters = {
+        'batch_size': 3,
+        'num_workers': 3,
         'device': 'cpu',
-        'dataset_type': SB_Detection.TEST,
+        'dataset_type': SB_Detection.TRAIN,
         'network': {
-            'weights_file_path': os.path.join(paths.trained_models_weights_folder_path, 'FasterRCNN', 'Instance_000', 'Epoch-1 -- Batch-1 -- Batch Loss-2.4029379.pt')
+            'model': FasterRCNN,
+            'weights_file_path': os.path.join(paths.trained_models_weights_folder_path, 'FasterRCNN', 'Instance_003', 'Epoch-3 -- Epoch Loss-0.000976.pt')
         }
     }
     if torch.cuda.is_available():
-        hyperparameters['device'] = 'cuda'
+        parameters['device'] = 'cuda'
 
     print('Commencing Evaluation')
-    get_losses(hyperparameters)
+    get_losses(parameters)
     print('Evaluation Completed')

@@ -14,6 +14,8 @@ class VideoSurfer:
             raise IOError('Video file does not exists!')
 
         self.video = cv2.VideoCapture(self.video_file_path)
+        self.fps = int(self.video.get(propId=cv2.CAP_PROP_FPS))
+        self.frame_shape = (int(self.video.get(propId=cv2.CAP_PROP_FRAME_WIDTH)), int(self.video.get(propId=cv2.CAP_PROP_FRAME_HEIGHT)))
         self.num_frames = int(self.video.get(propId=cv2.CAP_PROP_FRAME_COUNT))
 
     def __len__(self):

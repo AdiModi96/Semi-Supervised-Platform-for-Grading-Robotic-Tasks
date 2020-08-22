@@ -14,7 +14,6 @@ from src.SB.models import FasterRCNN
 
 
 def train_FasterRCNN(hyperparameters):
-
     if hyperparameters['device'] == 'cuda':
         torch.cuda.init()
 
@@ -64,7 +63,6 @@ def train_FasterRCNN(hyperparameters):
         loss_threshold = float('inf')
 
     for epoch_idx in range(hyperparameters['num_epochs']):
-        epoch_start_time = time.time()
 
         print('-' * 80)
         print('Epoch: {} of {}...'.format(epoch_idx + 1, hyperparameters['num_epochs']))
@@ -81,6 +79,7 @@ def train_FasterRCNN(hyperparameters):
             'loss_classifier': 0,
             'loss_box_reg': 0,
         }
+        epoch_start_time = time.time()
         for batch in dataloader:
 
             # Getting network inputs and outputs for the batch
@@ -102,7 +101,7 @@ def train_FasterRCNN(hyperparameters):
                 epoch_loss_dictionary[loss_type] += len(batch) * batch_loss_dictionary[loss_type].item()
 
             if sum_batch_losses <= loss_threshold:
-                loss_threshold = 0.80 * sum_batch_losses
+                loss_threshold = sum_batch_losses / 1.1
                 torch.save(
                     network.get_state_dict(),
                     os.path.join(
