@@ -25,17 +25,17 @@ class SB_Detection(Dataset):
     }
 
     OBJECT_ID_TO_NAME = {
-        0: 'arena_center',
-        1: 'robot',
-        2: 'red_coin',
-        3: 'green_coin'
+        1: 'arena_center',
+        2: 'robot',
+        3: 'red_coin',
+        4: 'green_coin'
     }
 
     OBJECT_NAME_TO_ID = {
-        'arena_center': 0,
-        'robot': 1,
-        'red_coin': 2,
-        'green_coin': 3
+        'arena_center': 1,
+        'robot': 2,
+        'red_coin': 3,
+        'green_coin': 4
     }
 
     def __init__(self, dataset_type=TRAIN, tensor_library=TENSOR_LIB_NP):

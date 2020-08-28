@@ -9,17 +9,17 @@ from src import paths
 from src.SB.utils import VideoSurfer as VS
 
 OBJECT_ID_TO_NAME = {
-    0: 'arena_center',
-    1: 'robot',
-    2: 'red_coin',
-    3: 'green_coin'
+    1: 'arena_center',
+    2: 'robot',
+    3: 'red_coin',
+    4: 'green_coin'
 }
 
 OBJECT_NAME_TO_ID = {
-    'arena_center': 0,
-    'robot': 1,
-    'red_coin': 2,
-    'green_coin': 3
+    'arena_center': 1,
+    'robot': 2,
+    'red_coin': 3,
+    'green_coin': 4
 }
 
 
@@ -72,8 +72,8 @@ def extract_frames_and_get_annotations(video_file_path, video_annotations_file_p
         return frames_annotations
 
 
-# TYPE = 'train'
-TYPE = 'test'
+TYPE = 'train'
+# TYPE = 'test'
 
 # Checking if videos folder exists
 videos_folder_path = os.path.join(paths.sb_data_folder_path, TYPE, 'videos')
@@ -108,6 +108,7 @@ for file_name in os.listdir(videos_folder_path):
         print('Skipping: annotations does not exist for video: {}'.format(file_name))
 
     frames_annotations += extract_frames_and_get_annotations(video_file_path, video_annotations_file_path)
+    break
 
 frames_annotations_folder_path = os.path.join(paths.sb_data_folder_path, TYPE, 'frames annotations')
 if not os.path.isdir(frames_annotations_folder_path):

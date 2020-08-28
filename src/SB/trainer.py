@@ -19,8 +19,10 @@ def train_FasterRCNN(hyperparameters):
 
     # Initializing network
     network = FasterRCNN(pretrained=hyperparameters['network']['pretrained'])
-    if hyperparameters['network']['weights_file_path']:
+
+    if hyperparameters['network']['weights_file_path'] and os.path.isfile(hyperparameters['network']['weights_file_path']):
         network.set_state_dict(torch.load(hyperparameters['network']['weights_file_path']))
+
     network.train()
     network.to(hyperparameters['device'])
 
@@ -71,7 +73,7 @@ def train_FasterRCNN(hyperparameters):
         batch_idx = 0
 
         total_batches = math.ceil(len(dataset) / hyperparameters['batch_size'])
-        progress_bar = tqdm(desc='Batches Completed', total=total_batches)
+        progress_bar = tqdm(desc='Losses: ', total=total_batches)
         sum_batch_losses = float('inf')
         epoch_loss_dictionary = {
             'loss_rpn_box_reg': 0,
@@ -106,7 +108,7 @@ def train_FasterRCNN(hyperparameters):
                     network.get_state_dict(),
                     os.path.join(
                         training_instance_folder_path, 'Epoch-{} -- Batch-{} -- Batch Loss-{}.pt'.format(
-                            epoch_idx + 1, batch_idx + 1, round(sum_batch_losses.item(), 7)
+                            str(epoch_idx + 1).zfill(3), str(batch_idx + 1).zfill(5), round(sum_batch_losses.item(), 7)
                         )
                     )
                 )
@@ -162,7 +164,7 @@ def train_FasterRCNN(hyperparameters):
             network.get_state_dict(),
             os.path.join(
                 training_instance_folder_path, 'Epoch-{} -- Epoch Loss-{}.pt'.format(
-                    epoch_idx + 1, round(sum_epoch_losses, 7))
+                    str(epoch_idx + 1).zfill(3), round(sum_epoch_losses, 7))
             )
         )
 
@@ -185,7 +187,7 @@ if __name__ == '__main__':
         },
         'network': {
             'pretrained': True,
-            'weights_file_path': os.path.join(paths.trained_models_weights_folder_path, 'FasterRCNN', 'Instance_000', 'Epoch-1 -- Batch-1972 -- Batch Loss-0.0114837.pt')
+            'weights_file_path': None
         }
     }
     if torch.cuda.is_available():

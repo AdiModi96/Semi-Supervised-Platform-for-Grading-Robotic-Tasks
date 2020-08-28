@@ -18,8 +18,12 @@ def annotate(parameters):
         torch.cuda.init()
 
     network = parameters['network']['model']()
-    if parameters['network']['weights_file_path']:
+    if parameters['network']['weights_file_path'] and os.path.isfile(parameters['network']['weights_file_path']):
         network.set_state_dict(torch.load(parameters['network']['weights_file_path']))
+    else:
+        print('Quitting: Network weight\'s file does not exists')
+        sys.exit(0)
+
     network.eval()
     network.to(parameters['device'])
 
@@ -86,12 +90,13 @@ if __name__ == '__main__':
     print('Commencing Annotation')
     parameters = {
         'video_file_paths': [
-            os.path.join(r'D:\Codes\Python\IIT Bombay\Semester 4\[CS 694] Seminar\data\SB\04 - Annotated\videos', video_file_name) for video_file_name in os.listdir(r'D:\Codes\Python\IIT Bombay\Semester 4\[CS 694] Seminar\data\SB\04 - Annotated\videos')
+            # os.path.join(paths.data_folder_path, 'SB', 'test', 'videos', video_file_name) for video_file_name in os.listdir(os.path.join(paths.data_folder_path, 'SB', 'test', 'videos'))
+            os.path.join(r'D:\Codes\Python\IIT Bombay\Semester 4\[CS 694] Seminar\data\SB\03 - Cropped', video_file_name) for video_file_name in os.listdir(os.path.join(r'D:\Codes\Python\IIT Bombay\Semester 4\[CS 694] Seminar\data\SB\03 - Cropped'))
         ],
         'device': 'cpu',
         'network': {
             'model': FasterRCNN,
-            'weights_file_path': os.path.join(paths.trained_models_weights_folder_path, 'FasterRCNN', 'Instance_003', 'Epoch-3 -- Epoch Loss-0.000976.pt')
+            'weights_file_path': os.path.join(paths.trained_models_weights_folder_path, 'FasterRCNN', 'Instance_005', 'Epoch-2 -- Epoch Loss-0.0012627.pt')
         }
     }
 

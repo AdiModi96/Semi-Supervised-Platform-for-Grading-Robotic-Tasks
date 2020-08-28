@@ -10,20 +10,23 @@ def test_SB_Detection_dataset(dataset_type=SB_Detection.TRAIN):
 
     dataset.shuffle()
 
+    plt.figure(num='Images')
     num_subplots = (1, 1)
     subplot_idx = 1
 
-    plt.figure(num='Images')
     for instance_idx in np.random.randint(0, len(dataset), size=(num_subplots[0] * num_subplots[1])):
         input, output = dataset[instance_idx]
 
         image = IU.draw_annotation(image=input, annotations=output)
 
         plt.subplot(num_subplots[0], num_subplots[1], subplot_idx)
+        plt.axis('off')
         plt.imshow(image, cmap='gray', vmin=0, vmax=1)
         subplot_idx += 1
+
+    plt.tight_layout()
     plt.show()
 
 
 if __name__ == '__main__':
-    test_SB_Detection_dataset(dataset_type=SB_Detection.TEST)
+    test_SB_Detection_dataset(dataset_type=SB_Detection.TRAIN)

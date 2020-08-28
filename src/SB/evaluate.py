@@ -1,5 +1,6 @@
 import math
 import os
+import sys
 import time
 
 import torch
@@ -17,8 +18,12 @@ def get_losses(parameters):
 
     # Initializing network
     network = parameters['network']['model']()
-    if parameters['network']['weights_file_path']:
+    if os.path.isfile(parameters['network']['weights_file_path']):
         network.set_state_dict(torch.load(parameters['network']['weights_file_path']))
+    else:
+        print('Quitting: Network weight\'s file does not exists')
+        sys.exit(0)
+
     network.train()
     network.to(parameters['device'])
 
@@ -120,7 +125,7 @@ if __name__ == '__main__':
         'dataset_type': SB_Detection.TRAIN,
         'network': {
             'model': FasterRCNN,
-            'weights_file_path': os.path.join(paths.trained_models_weights_folder_path, 'FasterRCNN', 'Instance_003', 'Epoch-3 -- Epoch Loss-0.000976.pt')
+            'weights_file_path': os.path.join(paths.trained_models_weights_folder_path, 'FasterRCNN', 'Instance_005', 'Epoch-2 -- Epoch Loss-0.0012627.pt')
         }
     }
     if torch.cuda.is_available():
