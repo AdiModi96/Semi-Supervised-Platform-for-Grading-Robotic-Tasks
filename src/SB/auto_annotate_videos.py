@@ -13,7 +13,7 @@ from src.SB.utils import ImageUtils as IU
 from src.SB.utils import VideoSurfer as VS
 
 
-def annotate(parameters):
+def auto_annotate(parameters):
     if parameters['device'] == 'cuda':
         torch.cuda.init()
 
@@ -37,7 +37,7 @@ def annotate(parameters):
         print('-' * 80)
         video_surfer = VS(video_file_path=video_file_path)
 
-        annotated_video_folder_path = os.path.join(paths.results_folder_path, network.__class__.__name__)
+        annotated_video_folder_path = os.path.join(paths.auto_annotation_videos_folder_path, network.__class__.__name__)
         if not os.path.isdir(annotated_video_folder_path):
             os.makedirs(annotated_video_folder_path)
 
@@ -90,18 +90,18 @@ if __name__ == '__main__':
     print('Commencing Annotation')
     parameters = {
         'video_file_paths': [
-            # os.path.join(paths.data_folder_path, 'SB', 'test', 'videos', video_file_name) for video_file_name in os.listdir(os.path.join(paths.data_folder_path, 'SB', 'test', 'videos'))
+            # os.path.join(r'D:\Codes\Python\IIT Bombay\Semester 4\[CS 694] Seminar\data\SB\03 - Cropped\1033_original.mp4       ')
             os.path.join(r'D:\Codes\Python\IIT Bombay\Semester 4\[CS 694] Seminar\data\SB\03 - Cropped', video_file_name) for video_file_name in os.listdir(os.path.join(r'D:\Codes\Python\IIT Bombay\Semester 4\[CS 694] Seminar\data\SB\03 - Cropped'))
         ],
         'device': 'cpu',
         'network': {
             'model': FasterRCNN,
-            'weights_file_path': os.path.join(paths.trained_models_weights_folder_path, 'FasterRCNN', 'Instance_005', 'Epoch-2 -- Epoch Loss-0.0012627.pt')
+            'weights_file_path': os.path.join(paths.trained_models_weights_folder_path, 'FasterRCNN', 'Instance_003', 'Epoch-3 -- Epoch Loss-0.000976.pt')
         }
     }
 
     if torch.cuda.is_available():
         parameters['device'] = 'cuda'
 
-    annotate(parameters)
+    auto_annotate(parameters)
     print('Annotation Completed')

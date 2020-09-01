@@ -88,7 +88,7 @@ def get_losses(parameters):
     print('-' * 80)
 
     epoch_summary = '''
-            Epoch Losses: 
+            Epoch Losses:
             •RPN Regression:
                 •Cumulative: {}
                 •Mean: {}

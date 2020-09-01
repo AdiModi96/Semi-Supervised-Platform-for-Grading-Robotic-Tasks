@@ -1,0 +1,15 @@
+★ e-Yantra's own wrapper library over opencv-python. The library will have the following fuctionalities:
+    ★ Same function syntax to get frames from the camera.
+    ★ It will also consecutively save the video while providing the frames.
+    ★ Perspective waarp each frame and then save the video.
+★ Elements/Objects in the arena should not have overlapping structure. Should atleast differ significantly, in the following terms:
+    ★ Shape.
+    ★ Size.
+    ★ Color.
+    ★ Visual Texture.
+★ Build and provide a way to mount for the following means:
+    ★ Arena.
+    ★ Camera.
+    ★ Illumination Solutions.
+★ Arena should be laid perfectly.
+★ Many of the erroneuos ones belong from the unseen data. One possible causation is data inconsistency.
