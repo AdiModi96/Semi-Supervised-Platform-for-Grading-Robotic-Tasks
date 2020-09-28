@@ -5,7 +5,7 @@ import cv2
 from src.SB.datasets import SB_Detection
 
 
-class VideoSurfer:
+class FrameExtractor:
 
     def __init__(self, video_file_path):
         super().__init__()
@@ -35,7 +35,7 @@ class ImageUtils:
     def __init__(self) -> None:
         super().__init__()
 
-    # If weights are none, all of the images are merges with equal weights
+    # If weights are none, all of the images are merged with equal weights
     @staticmethod
     def draw_annotation(image, annotations):
         image = image.copy()

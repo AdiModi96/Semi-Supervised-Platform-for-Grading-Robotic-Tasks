@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup as BS4
 from tqdm import tqdm
 
 from src import paths
-from src.SB.utils import VideoSurfer as VS
+from src.SB.utils import FrameExtractor as FE
 
 OBJECT_ID_TO_NAME = {
     1: 'arena_center',
@@ -27,13 +27,13 @@ def extract_frames_and_get_annotations(video_file_path, video_annotations_file_p
     file_prefix = video_file_path.split(os.sep)[-1].replace('.mp4', '')
     frames_annotations = []
 
-    video_surfer = VS(video_file_path)
-    progress_bar = tqdm(total=len(video_surfer))
+    frame_extractor = FE(video_file_path)
+    progress_bar = tqdm(total=len(frame_extractor))
     with open(video_annotations_file_path) as video_annotations_file:
 
         video_annotations_xml = BS4(video_annotations_file.read(), 'lxml')
-        for frame_idx in range(len(video_surfer)):
-            frame = video_surfer[frame_idx]
+        for frame_idx in range(len(frame_extractor)):
+            frame = frame_extractor[frame_idx]
             frame_file_name = file_prefix + '_frame_' + str(frame_idx).zfill(5) + '.jpg'
             cv2.imwrite(os.path.join(paths.sb_data_folder_path, TYPE, 'frames', frame_file_name), frame)
 

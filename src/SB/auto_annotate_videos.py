@@ -9,8 +9,7 @@ from tqdm import tqdm
 from src import paths
 from src.SB.datasets import SB_Detection
 from src.SB.models import FasterRCNN
-from src.SB.utils import ImageUtils as IU
-from src.SB.utils import VideoSurfer as VS
+from src.SB.utils import FrameExtractor as FE, ImageUtils as IU
 
 
 def auto_annotate(parameters):
@@ -35,7 +34,7 @@ def auto_annotate(parameters):
         print('-' * 80)
         print('Annotating video: {}'.format(video_file_path))
         print('-' * 80)
-        video_surfer = VS(video_file_path=video_file_path)
+        frame_extractor = FE(video_file_path=video_file_path)
 
         annotated_video_folder_path = os.path.join(paths.auto_annotation_videos_folder_path, network.__class__.__name__)
         if not os.path.isdir(annotated_video_folder_path):
@@ -46,13 +45,13 @@ def auto_annotate(parameters):
         annotated_video_writer = cv2.VideoWriter(
             annotated_video_file_path,
             cv2.VideoWriter_fourcc(*'mp4v'),
-            video_surfer.fps,
-            video_surfer.frame_shape
+            frame_extractor.fps,
+            frame_extractor.frame_shape
         )
 
-        progress_bar = tqdm(total=len(video_surfer))
-        for frame_idx in range(len(video_surfer)):
-            frame = cv2.cvtColor(video_surfer[frame_idx], cv2.COLOR_BGR2RGB) / 255
+        progress_bar = tqdm(total=len(frame_extractor))
+        for frame_idx in range(len(frame_extractor)):
+            frame = cv2.cvtColor(frame_extractor[frame_idx], cv2.COLOR_BGR2RGB) / 255
 
             predicted_annotations = network.predict_batch(
                 torch.unsqueeze(
