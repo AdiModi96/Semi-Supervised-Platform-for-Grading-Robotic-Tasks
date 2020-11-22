@@ -13,39 +13,33 @@ from src.SB.datasets import SB_Detection
 from src.SB.models import FasterRCNN
 
 
-def train_FasterRCNN(hyperparameters):
-    if hyperparameters['device'] == 'cuda':
+def train_FasterRCNN(dataset, parameters):
+    if parameters['device'] == 'cuda':
         torch.cuda.init()
 
     # Initializing network
-    network = FasterRCNN(pretrained=hyperparameters['network']['pretrained'])
+    network = FasterRCNN(pretrained=parameters['network']['pretrained'])
 
-    if hyperparameters['network']['weights_file_path'] and os.path.isfile(hyperparameters['network']['weights_file_path']):
-        network.set_state_dict(torch.load(hyperparameters['network']['weights_file_path']))
+    if parameters['network']['weights_file_path'] and os.path.isfile(parameters['network']['weights_file_path']):
+        network.set_state_dict(torch.load(parameters['network']['weights_file_path']))
 
     network.train()
-    network.to(hyperparameters['device'])
+    network.to(parameters['device'])
 
-    # Initializing dataset
-    dataset = SB_Detection(
-        dataset_type=SB_Detection.TRAIN,
-        tensor_library=SB_Detection.TENSOR_LIB_TORCH
-    )
-    dataset.shuffle()
     dataloader = DataLoader(
         dataset,
-        batch_size=hyperparameters['batch_size'],
-        num_workers=hyperparameters['num_workers'],
+        batch_size=parameters['batch_size'],
+        num_workers=parameters['num_workers'],
         collate_fn=SB_Detection.collate_dataloader_batch,
         shuffle=True
     )
 
     # Defining optimizer
-    optimizer = hyperparameters['optimizer']['type'](
+    optimizer = parameters['optimizer']['type'](
         network.parameters(),
-        lr=hyperparameters['optimizer']['learning_rate'],
-        betas=hyperparameters['optimizer']['betas'],
-        weight_decay=hyperparameters['optimizer']['weight_decay']
+        lr=parameters['optimizer']['learning_rate'],
+        betas=parameters['optimizer']['betas'],
+        weight_decay=parameters['optimizer']['weight_decay']
     )
 
     # Finding training instance folder path
@@ -58,21 +52,21 @@ def train_FasterRCNN(hyperparameters):
     if not os.path.isdir(training_instance_folder_path):
         os.makedirs(training_instance_folder_path)
 
-    if hyperparameters['network']['weights_file_path']:
-        file_name = hyperparameters['network']['weights_file_path'].split(os.sep)[-1]
+    if parameters['network']['weights_file_path']:
+        file_name = parameters['network']['weights_file_path'].split(os.sep)[-1]
         loss_threshold = float(re.findall('[0-9].[0-9]+', file_name)[0])
     else:
         loss_threshold = float('inf')
 
-    for epoch_idx in range(hyperparameters['num_epochs']):
+    for epoch_idx in range(parameters['num_epochs']):
 
         print('-' * 80)
-        print('Epoch: {} of {}...'.format(epoch_idx + 1, hyperparameters['num_epochs']))
+        print('Epoch: {} of {}...'.format(epoch_idx + 1, parameters['num_epochs']))
         print('-' * 80)
 
         batch_idx = 0
 
-        total_batches = math.ceil(len(dataset) / hyperparameters['batch_size'])
+        total_batches = math.ceil(len(dataset) / parameters['batch_size'])
         progress_bar = tqdm(desc='Losses: ', total=total_batches)
         sum_batch_losses = float('inf')
         epoch_loss_dictionary = {
@@ -86,8 +80,8 @@ def train_FasterRCNN(hyperparameters):
 
             # Getting network inputs and outputs for the batch
             inputs, outputs = batch
-            inputs = [image.to(hyperparameters['device']) for image in inputs]
-            outputs = [{key: output[key].to(hyperparameters['device']) for key in output.keys()} for output in outputs]
+            inputs = [image.to(parameters['device']) for image in inputs]
+            outputs = [{key: output[key].to(parameters['device']) for key in output.keys()} for output in outputs]
 
             # Getting batch loss
             batch_loss_dictionary = network.fit_batch(inputs, outputs)
@@ -173,8 +167,16 @@ def train_FasterRCNN(hyperparameters):
 
 
 if __name__ == '__main__':
-    # Defining hyperparameters for FasterRCNN
-    hyperparameters = {
+
+    # Initializing dataset
+    dataset = SB_Detection(
+        dataset_type=SB_Detection.TRAIN,
+        tensor_library=SB_Detection.TENSOR_LIB_TORCH
+    )
+    dataset.shuffle()
+
+    # Defining parameters for training FasterRCNN
+    parameters = {
         'batch_size': 5,
         'num_workers': 5,
         'num_epochs': 30,
@@ -191,8 +193,8 @@ if __name__ == '__main__':
         }
     }
     if torch.cuda.is_available():
-        hyperparameters['device'] = 'cuda'
+        parameters['device'] = 'cuda'
 
     print('Commencing Training')
-    train_FasterRCNN(hyperparameters)
+    train_FasterRCNN(dataset, parameters)
     print('Training Completed')

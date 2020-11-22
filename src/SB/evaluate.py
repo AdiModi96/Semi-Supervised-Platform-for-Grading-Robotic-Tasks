@@ -12,7 +12,7 @@ from src.SB.datasets import SB_Detection
 from src.SB.models import FasterRCNN
 
 
-def get_losses(parameters):
+def get_losses(dataset, parameters):
     if parameters['device'] == 'cuda':
         torch.cuda.init()
 
@@ -27,13 +27,6 @@ def get_losses(parameters):
     network.train()
     network.to(parameters['device'])
 
-    # Initializing dataset
-    dataset = SB_Detection(
-        dataset_type=parameters['dataset_type'],
-        tensor_library=SB_Detection.TENSOR_LIB_TORCH
-    )
-
-    dataset.shuffle()
     dataloader = DataLoader(
         dataset,
         batch_size=parameters['batch_size'],
@@ -116,7 +109,20 @@ def get_losses(parameters):
     print(epoch_summary)
 
 
+# Build This!
+def get_confusion_matrix(dataset, parameters):
+    pass
+
+
 if __name__ == '__main__':
+
+    # Initializing dataset
+    dataset = SB_Detection(
+        dataset_type=SB_Detection.TRAIN,
+        tensor_library=SB_Detection.TENSOR_LIB_TORCH
+    )
+    dataset.shuffle()
+
     # Building parameters for evaluation
     parameters = {
         'batch_size': 3,
@@ -132,5 +138,5 @@ if __name__ == '__main__':
         parameters['device'] = 'cuda'
 
     print('Commencing Evaluation')
-    get_losses(parameters)
+    get_losses(dataset, parameters)
     print('Evaluation Completed')

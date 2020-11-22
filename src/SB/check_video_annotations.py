@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+import paths
 
 from src.SB.utils import ImageUtils as IU
 
@@ -81,7 +82,13 @@ def play_annotation(video_file_paths, annotation_file_paths, playback_speed=1.0)
         cv2.destroyAllWindows()
 
 
-video_file_paths = [os.path.abspath(r"")]
-annotation_file_paths = [os.path.abspath(r"")]
+# videos_folder_path = os.path.join(paths.sb_data_folder_path, 'train', 'videos')
+# video_file_paths = [os.path.join(videos_folder_path, video_file_name) for video_file_name in os.listdir(videos_folder_path)]
+video_file_paths = [os.path.join(paths.sb_data_folder_path, 'train', 'videos', '547_bonus.mp4',)]
+
+# annotations_folder_path = os.path.join(paths.sb_data_folder_path, 'train', 'videos annotations')
+# annotation_file_paths = [os.path.join(annotations_folder_path, annotation_file_name) for annotation_file_name in os.listdir(annotations_folder_path)]
+annotation_file_paths = [os.path.join(paths.sb_data_folder_path, 'train', 'videos annotations', '547_bonus.xml')]
+
 playback_speed = 2.0
 play_annotation(video_file_paths, annotation_file_paths, playback_speed)
